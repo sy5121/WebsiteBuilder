@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Website Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .builder-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .component-item {
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .component-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .canvas-area {
+            flex: 1;
+            background: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .canvas {
+            min-height: 100%;
+            padding: 20px;
+            position: relative;
+        }
+
+        .properties-panel {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .element {
+            margin: 10px 0;
+            padding: 15px;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .element:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .element.selected {
+            border-color: #f5576c;
+            background: rgba(245, 87, 108, 0.05);
+            box-shadow: 0 0 0 2px rgba(245, 87, 108, 0.2);
+        }
+
+        .element-controls {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: none;
+        }
+
+        .element.selected .element-controls {
+            display: block;
+        }
+
+        .control-btn {
+            background: #f5576c;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .text-section {
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 35px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .toolbar {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="builder-container">
+        <!-- Sidebar with Components -->
+        <div class="sidebar">
+            <h2>🎨 Components</h2>
+            <div class="components-grid">
+                <button class="component-item" onclick="addComponent('hero')">🚀 Hero</button>
+                <button class="component-item" onclick="addComponent('text')">📝 Text</button>
+                <button class="component-item" onclick="addComponent('heading')">📋 Heading</button>
+                <button class="component-item" onclick="addComponent('button')">🔘 Button</button>
+                <button class="component-item" onclick="addComponent('image')">🖼️ Image</button>
+                <button class="component-item" onclick="addComponent('cards')">📊 Cards</button>
+                <button class="component-item" onclick="addComponent('form')">📋 Form</button>
+                <button class="component-item" onclick="addComponent('spacer')">⬜ Spacer</button>
+            </div>
+            
+            <h2>⚙️ Actions</h2>
+            <button class="export-btn" onclick="exportWebsite()">💾 Export HTML</button>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <div class="toolbar">
+                <button onclick="clearCanvas()">🗑️ Clear All</button>
+                <button onclick="previewMode()">👁️ Preview</button>
+                <button onclick="undoLast()">↩️ Undo</button>
+            </div>
+            <div class="canvas" id="canvas">
+                <div class="hero-section element" onclick="selectElement(this)">
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                        <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                        <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                    </div>
+                    <h1 contenteditable="true">Welcome to Your Website</h1>
+                    <p contenteditable="true">Build amazing websites without writing a single line of code</p>
+                    <button class="cta-button" contenteditable="true">Get Started</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="properties-panel">
+            <h2>🎛️ Properties</h2>
+            <div id="properties-content">
+                <p style="color: #666; text-align: center; margin-top: 50px;">Select an element to edit its properties</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedElement = null;
+        let history = [];
+        let components = [];
+
+        function addComponent(type) {
+            const canvas = document.getElementById('canvas');
+            let element;
+
+            switch(type) {
+                case 'hero':
+                    element = createHeroSection();
+                    break;
+                case 'text':
+                    element = createTextSection();
+                    break;
+                case 'heading':
+                    element = createHeading();
+                    break;
+                case 'button':
+                    element = createButton();
+                    break;
+                case 'image':
+                    element = createImage();
+                    break;
+                case 'cards':
+                    element = createCards();
+                    break;
+                case 'form':
+                    element = createForm();
+                    break;
+                case 'spacer':
+                    element = createSpacer();
+                    break;
+            }
+
+            canvas.appendChild(element);
+            selectElement(element);
+            saveToHistory();
+        }
+
+        function createHeroSection() {
+            const hero = document.createElement('div');
+            hero.className = 'hero-section element';
+            hero.onclick = (e) => { e.stopPropagation(); selectElement(hero); };
+            hero.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <h1 contenteditable="true">Your Amazing Headline</h1>
+                <p contenteditable="true">Describe your awesome product or service here</p>
+                <button class="cta-button" contenteditable="true">Call to Action</button>
+            `;
+            return hero;
+        }
+
+        function createTextSection() {
+            const text = document.createElement('div');
+            text.className = 'text-section element';
+            text.onclick = (e) => { e.stopPropagation(); selectElement(text); };
+            text.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <h2 contenteditable="true">Section Title</h2>
+                <p contenteditable="true">Add your content here. You can write about your services, products, or any information you want to share with your visitors.</p>
+            `;
+            return text;
+        }
+
+        function createHeading() {
+            const heading = document.createElement('div');
+            heading.className = 'element';
+            heading.onclick = (e) => { e.stopPropagation(); selectElement(heading); };
+            heading.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <h2 contenteditable="true" style="color: #333; margin-bottom: 10px;">Your Heading Here</h2>
+            `;
+            return heading;
+        }
+
+        function createButton() {
+            const buttonEl = document.createElement('div');
+            buttonEl.className = 'element';
+            buttonEl.onclick = (e) => { e.stopPropagation(); selectElement(buttonEl); };
+            buttonEl.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <button contenteditable="true" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 1rem;">Click Me</button>
+            `;
+            return buttonEl;
+        }
+
+        function createImage() {
+            const image = document.createElement('div');
+            image.className = 'element';
+            image.onclick = (e) => { e.stopPropagation(); selectElement(image); };
+            image.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); height: 200px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">📷 Image Placeholder</div>
+            `;
+            return image;
+        }
+
+        function createCards() {
+            const cards = document.createElement('div');
+            cards.className = 'element';
+            cards.onclick = (e) => { e.stopPropagation(); selectElement(cards); };
+            cards.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3 contenteditable="true">Feature 1</h3>
+                        <p contenteditable="true">Description of your first feature or service.</p>
+                    </div>
+                    <div class="card">
+                        <h3 contenteditable="true">Feature 2</h3>
+                        <p contenteditable="true">Description of your second feature or service.</p>
+                    </div>
+                    <div class="card">
+                        <h3 contenteditable="true">Feature 3</h3>
+                        <p contenteditable="true">Description of your third feature or service.</p>
+                    </div>
+                </div>
+            `;
+            return cards;
+        }
+
+        function createForm() {
+            const form = document.createElement('div');
+            form.className = 'element';
+            form.onclick = (e) => { e.stopPropagation(); selectElement(form); };
+            form.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 400px;">
+                    <h3 style="margin-bottom: 20px; color: #333;">Contact Form</h3>
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Message:</label>
+                        <textarea rows="4" placeholder="Your message here..."></textarea>
+                    </div>
+                    <button style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; width: 100%;">Send Message</button>
+                </div>
+            `;
+            return form;
+        }
+
+        function createSpacer() {
+            const spacer = document.createElement('div');
+            spacer.className = 'element';
+            spacer.onclick = (e) => { e.stopPropagation(); selectElement(spacer); };
+            spacer.innerHTML = `
+                <div class="element-controls">
+                    <button class="control-btn" onclick="moveUp(this.parentElement.parentElement)">↑</button>
+                    <button class="control-btn" onclick="moveDown(this.parentElement.parentElement)">↓</button>
+                    <button class="control-btn" onclick="deleteElement(this.parentElement.parentElement)">×</button>
+                </div>
+                <div style="height: 50px; background: rgba(102, 126, 234, 0.1); border: 2px dashed #667eea; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #667eea; font-size: 0.9rem;">Spacer (50px)</div>
+            `;
+            return spacer;
+        }
+
+        function selectElement(element) {
+            // Remove previous selection
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+            }
+            
+            selectedElement = element;
+            element.classList.add('selected');
+            
+            updatePropertiesPanel();
+        }
+
+        function updatePropertiesPanel() {
+            const panel = document.getElementById('properties-content');
+            if (!selectedElement) {
+                panel.innerHTML = '<p style="color: #666; text-align: center; margin-top: 50px;">Select an element to edit its properties</p>';
+                return;
+            }
+
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label>Background Color:</label>
+                    <input type="color" class="color-picker" onchange="updateElementStyle('backgroundColor', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Text Color:</label>
+                    <input type="color" class="color-picker" value="#000000" onchange="updateElementStyle('color', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Padding:</label>
+                    <input type="range" min="0" max="100" value="20" onchange="updateElementStyle('padding', this.value + 'px')">
+                    <span>20px</span>
+                </div>
+                <div class="form-group">
+                    <label>Margin:</label>
+                    <input type="range" min="0" max="100" value="10" onchange="updateElementStyle('margin', this.value + 'px 0')">
+                    <span>10px</span>
+                </div>
+                <div class="form-group">
+                    <label>Border Radius:</label>
+                    <input type="range" min="0" max="50" value="8" onchange="updateElementStyle('borderRadius', this.value + 'px')">
+                    <span>8px</span>
+                </div>
+                <div class="form-group">
+                    <label>Text Align:</label>
+                    <select onchange="updateElementStyle('textAlign', this.value)">
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function updateElementStyle(property, value) {
+            if (selectedElement) {
+                selectedElement.style[property] = value;
+                // Update the span for range inputs
+                if (event.target.type === 'range') {
+                    const span = event.target.nextElementSibling;
+                    if (span) span.textContent = value;
+                }
+            }
+        }
+
+        function moveUp(element) {
+            const prev = element.previousElementSibling;
+            if (prev) {
+                element.parentNode.insertBefore(element, prev);
+            }
+        }
+
+        function moveDown(element) {
+            const next = element.nextElementSibling;
+            if (next) {
+                element.parentNode.insertBefore(next, element);
+            }
+        }
+
+        function deleteElement(element) {
+            if (selectedElement === element) {
+                selectedElement = null;
+                updatePropertiesPanel();
+            }
+            element.remove();
+        }
+
+        function clearCanvas() {
+            if (confirm('Are you sure you want to clear all elements?')) {
+                document.getElementById('canvas').innerHTML = '';
+                selectedElement = null;
+                updatePropertiesPanel();
+            }
+        }
+
+        function exportWebsite() {
+            const canvas = document.getElementById('canvas');
+            const elements = canvas.querySelectorAll('.element');
+            
+            // Remove builder-specific classes and controls
+            const cleanHTML = canvas.innerHTML
+                .replace(/class="[^"]*element[^"]*"/g, '')
+                .replace(/<div class="element-controls">.*?<\/div>/g, '')
+                .replace(/onclick="[^"]*"/g, '')
+                .replace(/contenteditable="true"/g, '');
+
+            const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 40px; text-align: center; border-radius: 12px; }
+        .hero-section h1 { font-size: 3rem; margin-bottom: 20px; font-weight: 700; }
+        .hero-section p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
+        .cta-button { background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; }
+        .cta-button:hover { background: white; color: #667eea; }
+        .text-section { padding: 40px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #667eea; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    ${cleanHTML}
+</body>
+</html>`;
+
+            // Create and download the file
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my-website.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function previewMode() {
+            alert('Preview mode would open your website in a new tab! For now, you can export the HTML and open it in your browser.');
+        }
+
+        function undoLast() {
+            alert('Undo feature coming soon! For now, you can manually delete elements or clear all.');
+        }
+
+        // Click outside to deselect
+        document.getElementById('canvas').addEventListener('click', function(e) {
+            if (e.target === this) {
+                if (selectedElement) {
+                    selectedElement.classList.remove('selected');
+                    selectedElement = null;
+                    updatePropertiesPanel();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
